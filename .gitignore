@@ -1,0 +1,9 @@
+**/__pycache__
+.ipynb_checkpoints
+test*
+generate
+.idea
+.vscode
+demofile/mdx_q
+demofile/mdx_extra
+
