@@ -1,7 +1,14 @@
 #!/usr/bin/env python
 import argparse
+import os
+import re
 import ext.t2lutils as t2lutils
 from t2l.t2l import process
+
+
+def to_standard_lrc(enhanced_lrc):
+    """将增强型LRC（含逐字<mm:ss.xxx>时间戳）转为标准LRC（仅保留行级时间戳）"""
+    return re.sub(r'<\d{2}:\d{2}\.\d{3}>', '', enhanced_lrc)
 
 
 def cli():
@@ -19,6 +26,8 @@ def cli():
         '-m', '--model', help='demucs模型[mdx|mdx_extra|mdx_q|mdx_extra_q], 默认：mdx_extra', default='mdx_extra', required=False)
     parser.add_argument(
         '-i', '--idx', help='demucs模型idx, 默认：-1', default=-1, required=False)
+    parser.add_argument('-o', '--out_dir', type=str, default='demofile',
+                        help='标准LRC输出目录，默认：demofile', required=False)
 
     args = parser.parse_args()
 
@@ -29,6 +38,15 @@ def cli():
     lrc = process(txt_lines, args.music_file, demucs_model=args.model, demucs_idx=int(
         args.idx), format=args.format, line_only=args.line_only, vocalize=(args.vocalize == 1))
     print(lrc)
+
+    # 转为标准LRC并保存到输出目录
+    standard_lrc = to_standard_lrc(lrc)
+    os.makedirs(args.out_dir, exist_ok=True)
+    base_name = os.path.splitext(os.path.basename(args.music_file))[0]
+    out_path = os.path.join(args.out_dir, base_name + '.lrc')
+    with open(out_path, 'w', encoding='utf-8') as f:
+        f.write(standard_lrc)
+    print(f'\n标准LRC已保存至: {out_path}')
 
 
 if __name__ == '__main__':

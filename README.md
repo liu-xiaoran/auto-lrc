@@ -2,6 +2,8 @@
 
 > AI-powered lyrics-to-music alignment tool — produce timestamped LRC files with per-word or per-line timing from plain text lyrics and audio.
 
+[中文文档](README_zh.md)
+
 ## Overview
 
 `track-lrc-align` takes a lyrics text file and an audio file, then generates a synced LRC file. It uses a CNN-RNN acoustic model with DTW (Dynamic Time Warping) alignment to map phonemes to audio frames. Built-in vocal separation via [Demucs](https://github.com/adefossez/demucs) improves alignment accuracy by isolating the singing voice.
@@ -28,7 +30,7 @@ pip install -r requirements.txt
 python main.py demofile/original_txt.txt demofile/original_track.mp3
 ```
 
-This runs the full pipeline with default settings: word-level alignment, Demucs vocal separation (mdx_extra ensemble), and LRC output.
+This runs the full pipeline with default settings: word-level alignment, Demucs vocal separation (mdx_extra ensemble), and prints the enhanced LRC (with per-word timestamps) to terminal. A standard LRC file (line-level timestamps only) is automatically saved to `demofile/original_track.lrc`.
 
 ### CLI Options
 
@@ -41,12 +43,14 @@ Options:
   -v, --vocalize   1 = separate vocals via Demucs (default), 0 = skip
   -m, --model      Demucs model: mdx | mdx_extra (default) | mdx_q | mdx_extra_q
   -i, --idx        Demucs model index: -1 = ensemble (default), 0-3 = single sub-model
+  -o, --out_dir    Standard LRC output directory (default: demofile)
 ```
 
 ### Examples
 
 ```bash
 # Word-level with vocal separation (default)
+# Prints enhanced LRC to terminal, saves standard LRC to demofile/song.lrc
 python main.py lyrics.txt song.mp3
 
 # Line-level, no vocal separation (faster)
@@ -54,6 +58,9 @@ python main.py lyrics.txt song.mp3 -l 1 -v 0
 
 # Use a lighter Demucs model
 python main.py lyrics.txt song.mp3 -m mdx_q
+
+# Specify a custom output directory for standard LRC
+python main.py lyrics.txt song.mp3 -o output
 ```
 
 ## Python API
@@ -137,6 +144,15 @@ The `method` parameter in the alignment pipeline accepts `"Baseline"`, `"MTL"`, 
 | Frame resolution | ~0.0348s | `256 / 22050 * 3` seconds per frame |
 | Mel features | 128 | Used in `train_audio_transforms` |
 | FFT size | 512 | Spectrogram computation |
+
+## Output
+
+The CLI produces two outputs:
+
+1. **Enhanced LRC** — printed to terminal, with per-word `<mm:ss.xxx>` timestamps for detailed alignment
+2. **Standard LRC** — saved to `demofile/` (or directory specified by `-o`), with only line-level `[mm:ss.xxx]` timestamps, compatible with standard LRC players
+
+The standard LRC filename is derived from the audio filename, e.g. `song.mp3` → `demofile/song.lrc`.
 
 ## Output Format
 
