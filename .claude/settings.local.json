@@ -10,7 +10,9 @@
       "Bash(git commit -m ':*)",
       "Bash(git push:*)",
       "Bash(git pull:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git lfs:*)",
+      "Bash(git rm:*)"
     ]
   }
 }
